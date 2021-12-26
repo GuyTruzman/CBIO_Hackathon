@@ -44,9 +44,10 @@ class TMHMM:
         for col_num in range(1, len(seq)):
             for state in self.states:
                 log_sum = logsumexp(F.T[col_num - 1] + self.log_T.T[self.ind_dict[state]])
-                if (state == "end" and seq[col_num] == "$"):
-                    print(F.T[col_num - 1], self.log_T[self.ind_dict[state]] == self.log_T.T[self.ind_dict[state]])
-                F[self.ind_dict[state]][col_num] = log_sum + self.log_E[self.ind_dict[state]][self.aa_dict[seq[col_num]]]
+                # if (state == "end" and seq[col_num] == "$"):
+                #     print(F.T[col_num - 1], self.log_T[self.ind_dict[state]] == self.log_T.T[self.ind_dict[state]])
+                F[self.ind_dict[state]][col_num] = log_sum + self.log_E[self.ind_dict[state]][
+                    self.aa_dict[seq[col_num]]]
         return F
 
     def backward(self, seq):
@@ -58,10 +59,52 @@ class TMHMM:
         return B
 
     def posterior(self, seq):
-        B = backward(seq)
-        F = forward(seq)
+        B = self.backward(seq)
+        F = self.forward(seq)
         P = F + B  # log space
         return np.argmax(P, axis=0)
+
+    def viterbi(self, seq):
+        """
+        viterbi decoding - calculates the probability for each state for each position in the sequence
+        :param seq: the sequence
+        :param emission_table: the emission table
+        :param transition_table: the transition table
+        :param motif_len: the motif length
+        :return: the probability for each state for each position in the sequence
+        """
+        V = np.log(np.zeros((self.num_states, len(seq)), dtype=float))
+        Ptr = np.zeros((self.num_states, len(seq)), dtype=int)
+        V[0][0] = 0
+        for col_num in range(1, len(seq)):
+            for state in self.states:
+                V[self.ind_dict[state]][col_num] = self.log_E[self.ind_dict[state]][self.aa_dict[seq[col_num]]] + np.max(
+                    V.T[col_num - 1] + self.log_T.T[self.ind_dict[state]])
+                Ptr[self.ind_dict[state]][col_num] = np.argmax(V.T[col_num - 1] + self.log_T.T[self.ind_dict[state]])
+
+        # traceback
+        states = []
+        state = self.ind_dict["end"]
+        for i in range(len(seq) - 1, -1, -1):
+            states.append(state)
+            state = Ptr[state][i]
+        return states[::-1]
+
+    def print_func(self, states, seq):
+        """
+        prints the results of viterbi and posterior
+        :param motif_len: motif length
+        :param states: the states we got from posterior or viterbi encoding
+        :param seq: the input sequence
+        :return: prints on screen according to the format given.
+        """
+        states_lst = ["M" if 4 <= i < (self.motif_length * 2) + 4 else "o" for i in states]
+        states_str = "".join(states_lst)
+        for i in range(0, len(seq), 50):
+            line_end = min(i + 50, len(seq))
+            print(states_str[i:line_end])
+            print(seq[i:line_end])
+            print()
 
 
 if __name__ == '__main__':
@@ -83,6 +126,16 @@ if __name__ == '__main__':
     fdf = pd.DataFrame(f)
     # print(f[1][645])
     fdf.to_csv("forward.csv", index=False)
-    bdf = pd.DataFrame(tmhmm.backward(seq))
-    bdf.to_csv("baclward.csv", index=False)
+    # bdf = pd.DataFrame(tmhmm.backward(seq))
+    # bdf.to_csv("baclward.csv", index=False)
     # print(tmhmm.backward(seq))
+    t = tmhmm.posterior(seq)
+    v = tmhmm.viterbi(seq)
+
+    print(t)
+    tmhmm.print_func(t, seq[1: len(seq) - 1])
+    print()
+    print()
+    print()
+    tmhmm.print_func(v, seq[1: len(seq) - 1])
+    print(v)
