@@ -5,7 +5,7 @@ import numpy as np
 class TMHMM:
 
     def __init__(self, emission_df, transition_df):
-        self.aa = "ACDEFGHIKLMNPQRSTVWY"
+        self.aa = list(emission_df.columns)
         self.aa_dict = {letter: index for index, letter in enumerate(AA_initials)}
         self.transition = transition_df
         self.emission = emission_df
