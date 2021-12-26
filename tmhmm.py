@@ -16,10 +16,12 @@ class TMHMM:
         self.log_E = np.log(self.emission)
         self.states = transition_df.columns
         self.ind_dict = self.create_ind_dict()
-        self.motif_length = 22
-        self.num_states = (self.motif_length * 2) + 4
+        self.motif_length = 21
+        self.cap_length = 5
+        self.num_states = len(self.states)
         self.transition = self.add_end_prob_to_transition()
         self.log_T = np.log(self.transition)
+        self.non_motif_states = [self.ind_dict[state] for state in ["start", "end", "in_glob", "out_glob"]]
 
     def add_end_prob_to_transition(self):
         self.transition[self.ind_dict["in_glob"], self.ind_dict["end"]] = self.alpha
@@ -78,7 +80,8 @@ class TMHMM:
         V[0][0] = 0
         for col_num in range(1, len(seq)):
             for state in self.states:
-                V[self.ind_dict[state]][col_num] = self.log_E[self.ind_dict[state]][self.aa_dict[seq[col_num]]] + np.max(
+                V[self.ind_dict[state]][col_num] = self.log_E[self.ind_dict[state]][
+                                                       self.aa_dict[seq[col_num]]] + np.max(
                     V.T[col_num - 1] + self.log_T.T[self.ind_dict[state]])
                 Ptr[self.ind_dict[state]][col_num] = np.argmax(V.T[col_num - 1] + self.log_T.T[self.ind_dict[state]])
 
@@ -90,6 +93,22 @@ class TMHMM:
             state = Ptr[state][i]
         return states[::-1]
 
+
+    def get_states_lst_for_viterbi(self, states_inds):
+        lst = []
+        for i in states_inds:
+            if i == self.ind_dict["start"]:
+                pass
+            elif i == self.ind_dict["in_glob"]:
+                lst.append("i")
+            elif i == self.ind_dict["out_glob"]:
+                lst.append("o")
+            elif i == self.ind_dict["end"]:
+                pass
+            else:
+                lst.append("M")
+        return lst
+
     def print_func(self, states, seq):
         """
         prints the results of viterbi and posterior
@@ -98,7 +117,8 @@ class TMHMM:
         :param seq: the input sequence
         :return: prints on screen according to the format given.
         """
-        states_lst = ["M" if 4 <= i < (self.motif_length * 2) + 4 else "o" for i in states]
+        # states_lst = ["0" if i in self.non_motif_states else "M" for i in states]
+        states_lst = self.get_states_lst_for_viterbi(states)
         states_str = "".join(states_lst)
         for i in range(0, len(seq), 50):
             line_end = min(i + 50, len(seq))
@@ -108,8 +128,8 @@ class TMHMM:
 
 
 if __name__ == '__main__':
-    transition_path = r"C:\Users\user\PycharmProjects\CBIO_Hackathon\transition.tsv"
-    emission_path = r"C:\Users\user\PycharmProjects\CBIO_Hackathon\emission.tsv"
+    transition_path = r"C:\Users\user\PycharmProjects\CBIO_Hackathon\transition_5cap.tsv"
+    emission_path = r"C:\Users\user\PycharmProjects\CBIO_Hackathon\emission_5cap.tsv"
     transition_df = pd.read_csv(transition_path, sep="\t", index_col=r"state\AA")
     emission_df = pd.read_csv(emission_path, sep="\t", index_col=r"state\AA")
 
@@ -122,10 +142,10 @@ if __name__ == '__main__':
           "HEAGHAIIGRLVPEHDPVHKVTIIPRGRALGVTFFLPEGDAISASRQKLESQISTLYGGRLAEEIIYGPEHVSTGASNDIKVATNLARNMVTQWGFSE" \
           "KLGPLLYAEEEGEVFLGRSVAKAKHMSDETARIIDQEVKALIERNYNRARQLLTDNMDILHAMKDALMKYETIDAPQIDDLMARRDVRPPAGWE" \
           "EPGASNNSGDNGSPKAPRPVDEPRTPNPGNTMSEQLGDK$"
-    f = tmhmm.forward(seq)
-    fdf = pd.DataFrame(f)
-    # print(f[1][645])
-    fdf.to_csv("forward.csv", index=False)
+    # f = tmhmm.forward(seq)
+    # fdf = pd.DataFrame(f)
+    # # print(f[1][645])
+    # fdf.to_csv("forward.csv", index=False)
     # bdf = pd.DataFrame(tmhmm.backward(seq))
     # bdf.to_csv("baclward.csv", index=False)
     # print(tmhmm.backward(seq))
@@ -138,4 +158,3 @@ if __name__ == '__main__':
     print()
     print()
     tmhmm.print_func(v, seq[1: len(seq) - 1])
-    print(v)
