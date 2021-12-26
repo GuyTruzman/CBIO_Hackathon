@@ -3,7 +3,7 @@ import numpy as np
 
 from tokenizer import Tokenizer
 
-proteins_initials = 'ACDEFGHIKLMNPQRSTVWY'
+AA_initials = 'ACDEFGHIKLMNPQRSTVWY'
 
 
 def parse_letters(tokenizer):
@@ -62,10 +62,10 @@ def parse_states(tokenizer):
 
 def states_to_tables(states):
     states_dict = {state: index for index, state in enumerate(states.keys())}
-    proteins_dict = {letter: index for index, letter in enumerate(proteins_initials)}
+    AA_dict = {letter: index for index, letter in enumerate(AA_initials)}
 
     transitions = np.zeros((len(states), len(states)))
-    emissions = np.zeros((len(states) - 1, len(proteins_initials)))
+    emissions = np.zeros((len(states), len(AA_initials)))
     labels = {}
     for from_state, state_info in states.items():
         if 'label' in state_info:
@@ -73,13 +73,15 @@ def states_to_tables(states):
         for to_state, p in state_info['trans'].items():
             transitions[states_dict[from_state], states_dict[to_state]] = p
         if from_state == 'begin':
+            emissions[states_dict[from_state]].fill(0.05)
             continue
         for letter, p in state_info['only'].items():
-            emissions[states_dict[from_state] - 1, proteins_dict[letter]] = p
+            emissions[states_dict[from_state], AA_dict[letter]] = p
+    print(labels)
     np.savetxt('transition.tsv',
-               np.c_[[r'state\state'] + list(states.keys()), np.vstack([list(states.keys()), transitions])],
+               np.c_[[r'state\AA'] + list(states.keys()), np.vstack([list(states.keys()), transitions])],
                delimiter='\t', fmt='%s')
-    np.savetxt('emissions.tsv', np.c_[list(states.keys()), np.vstack([list(proteins_initials), emissions])],
+    np.savetxt('emissions.tsv', np.c_[[r'state\AA'] + list(states.keys()), np.vstack([list(AA_initials), emissions])],
                delimiter='\t', fmt='%s')
 
 
