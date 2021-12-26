@@ -1,4 +1,4 @@
-state\AA	|	end	in_glob	out_glob	m1_in	m2_in	m3_in	m4_in	m5_in	m6_in	m7_in	m8_in	m9_in	m10_in	m11_in	m12_in	m13_in	m14_in	m15_in	m16_in	m17_in	m18_in	m19_in	m20_in	m21_in	m_end_in	m1_out	m2_out	m3_out	m4_out	m5_out	m6_out	m7_out	m8_out	m9_out	m10_out	m11_out	m12_out	m13_out	m14_out	m15_out	m16_out	m17_out	m18_out	m19_out	m20_out	m21_out	m_end_out							
+state\AA	start	end	in_glob	out_glob	m1_in	m2_in	m3_in	m4_in	m5_in	m6_in	m7_in	m8_in	m9_in	m10_in	m11_in	m12_in	m13_in	m14_in	m15_in	m16_in	m17_in	m18_in	m19_in	m20_in	m21_in	m_end_in	m1_out	m2_out	m3_out	m4_out	m5_out	m6_out	m7_out	m8_out	m9_out	m10_out	m11_out	m12_out	m13_out	m14_out	m15_out	m16_out	m17_out	m18_out	m19_out	m20_out	m21_out	m_end_out							
 start	0	0	0.549251	0.450749	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0							
 end	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0							
 in_glob	0	0	0.986708	0	0.013292	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0							
